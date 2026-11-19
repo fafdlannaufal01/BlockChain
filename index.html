@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Simple Blockchain</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f4f8;
+            color: #222;
+            margin: 0;
+            padding: 24px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 24px; }
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+        }
+        .card h2 { margin-top: 0; font-size: 1.15rem; }
+        label { display: block; margin: 10px 0 4px; font-weight: bold; font-size: 0.9rem; }
+        input {
+            width: 100%;
+            padding: 9px;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        button {
+            margin-top: 14px;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 5px;
+            background: #2f6fed;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        button:hover { background: #1f58c7; }
+        button.green { background: #1e9e5a; }
+        button.green:hover { background: #167a45; }
+        button.gray { background: #666; }
+        button.gray:hover { background: #444; }
+        .message {
+            background: #e8f1ff;
+            border-left: 4px solid #2f6fed;
+            padding: 12px 16px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            word-break: break-all;
+        }
+        .block { border-left: 5px solid #2f6fed; }
+        .block h3 { margin-top: 0; }
+        .field { margin: 8px 0; }
+        .field span.name { font-weight: bold; }
+        .hash {
+            font-family: Consolas, monospace;
+            font-size: 0.85rem;
+            word-break: break-all;
+            background: #f5f5f5;
+            padding: 4px 6px;
+            border-radius: 4px;
+        }
+        table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+        th, td { border: 1px solid #ddd; padding: 6px 10px; text-align: left; font-size: 0.9rem; }
+        th { background: #f0f0f0; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1>Simple Blockchain</h1>
+
+    {% if message %}
+        <div class="message">{{ message }}</div>
+    {% endif %}
+
+    <div class="card">
+        <h2>1. Add Transaction</h2>
+        <form action="/add_transaction" method="POST">
+            <label for="sender">Sender</label>
+            <input type="text" id="sender" name="sender" placeholder="e.g. Alice" required>
+
+            <label for="receiver">Receiver</label>
+            <input type="text" id="receiver" name="receiver" placeholder="e.g. Bob" required>
+
+            <label for="amount">Amount</label>
+            <input type="number" id="amount" name="amount" step="any" min="0.01" placeholder="e.g. 100" required>
+
+            <button type="submit">Add Transaction</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>2. Mine Pending Transactions</h2>
+        <form action="/mine" method="POST">
+            <label for="miner_address">Miner Name</label>
+            <input type="text" id="miner_address" name="miner_address" placeholder="e.g. Miner1" required>
+
+            <button type="submit" class="green">Mine Block</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>3. Check Blockchain Validity</h2>
+        <form action="/validate" method="POST">
+            <button type="submit" class="gray">Check Blockchain</button>
+        </form>
+    </div>
+
+    <h2>Blockchain Records</h2>
+
+    {% for block in chain %}
+        <div class="card block">
+            <h3>Block {{ block.index }}</h3>
+
+            <div class="field">
+                <span class="name">Transactions:</span>
+                {% if block.transactions and block.transactions[0] is mapping %}
+                    <table>
+                        <tr><th>From</th><th>To</th><th>Amount</th></tr>
+                        {% for tx in block.transactions %}
+                            <tr>
+                                <td>{{ tx["from"] }}</td>
+                                <td>{{ tx["to"] }}</td>
+                                <td>{{ tx["amount"] }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% else %}
+                    <div>{{ block.transactions | join(", ") }}</div>
+                {% endif %}
+            </div>
+
+            <div class="field">
+                <span class="name">Hash:</span>
+                <div class="hash">{{ block.hash }}</div>
+            </div>
+
+            <div class="field">
+                <span class="name">Prev:</span>
+                <div class="hash">{{ block.previous_hash }}</div>
+            </div>
+
+            <div class="field">
+                <span class="name">Nonce:</span> {{ block.nonce }}
+            </div>
+        </div>
+    {% endfor %}
+
+</div>
+</body>
+</html>
